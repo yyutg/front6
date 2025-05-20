@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет</title>
+    <link id="theme-style" rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Личный кабинет</h1>
+        <div id="user-info"></div>
+        
+        <div class="data-section">
+            <h2>Данные API</h2>
+            <button id="fetch-data">Обновить данные</button>
+            <div id="api-data"></div>
+            <div id="cache-status"></div>
+        </div>
+        
+        <button id="logout">Выйти</button>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        window.fetchData = function() {
+            const fetchBtn = document.getElementById('fetch-data');
+            fetchBtn.disabled = true;
+            fetchBtn.textContent = 'Загрузка...';
+            
+            fetch('/data')
+                .then(response => {
+                    if (!response.ok) throw new Error('Ошибка загрузки данных');
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('api-data').innerHTML = `
+                        <p>Сообщение: ${data.data.message}</p>
+                        <p>Число: ${data.data.randomNumber}</p>
+                        <p>Время: ${data.data.timestamp}</p>
+                    `;
+                    
+                    document.getElementById('cache-status').innerHTML = `
+                        <p>Данные ${data.fromCache ? 'из кэша' : 'сгенерированы'}</p>
+                        <p>Кэш обновлен: ${data.timestamp}</p>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Не удалось загрузить данные: ' + error.message);
+                })
+                .finally(() => {
+                    fetchBtn.disabled = false;
+                    fetchBtn.textContent = 'Обновить данные';
+                });
+        }
+        
+        document.getElementById('fetch-data').addEventListener('click', fetchData);
+        
+        document.getElementById('logout').addEventListener('click', () => {
+            fetch('/logout', { method: 'POST' })
+                .then(() => {
+                    window.location.href = '/';
+                });
+        });
+        
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.getElementById('theme-style').href = savedTheme === 'dark' ? 'dark-theme.css' : 'styles.css';
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.auth-forms, .data-section {
+    background: #1e1e1e;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+input {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+button {
+    background-color: #2e7d32;
+}
+
+button:hover {
+    background-color: #1b5e20;
+}

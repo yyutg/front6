@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аутентификация</title>
+    <link id="theme-style" rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="auth-forms">
+            <div id="login-form" class="form-container">
+                <h2>Вход</h2>
+                <form id="login">
+                    <input type="text" id="login-username" placeholder="Логин" required>
+                    <input type="password" id="login-password" placeholder="Пароль" required>
+                    <button type="submit">Войти</button>
+                </form>
+                <p>Нет аккаунта? <a href="#" id="show-register">Зарегистрируйтесь</a></p>
+            </div>
+
+            <div id="register-form" class="form-container" style="display: none;">
+                <h2>Регистрация</h2>
+                <form id="register">
+                    <input type="text" id="register-username" placeholder="Логин" required>
+                    <input type="password" id="register-password" placeholder="Пароль" required>
+                    <button type="submit">Зарегистрироваться</button>
+                </form>
+                <p>Уже есть аккаунт? <a href="#" id="show-login">Войдите</a></p>
+            </div>
+        </div>
+
+        <div class="theme-switcher">
+            <button id="theme-toggle">Переключить тему</button>
+        </div>
+    </div>
+    <script src="auth.js"></script>
+    <script>
+        document.getElementById('login')?.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Ошибка входа');
+                    return response.json();
+                })
+                .then(() => {
+                    window.location.href = '/profile.html';
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+        });
+
+        document.getElementById('register')?.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Ошибка регистрации');
+                    return response.json();
+                })
+                .then(() => {
+                    alert('Регистрация успешна. Теперь вы можете войти.');
+                    document.getElementById('register-form').style.display = 'none';
+                    document.getElementById('login-form').style.display = 'block';
+                    document.getElementById('register').reset();
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+        });
+
+        document.getElementById('show-register').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+        });
+
+        document.getElementById('show-login').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+        });
+
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            localStorage.setItem('theme', newTheme);
+            document.getElementById('theme-style').href = newTheme === 'dark' ? 'dark-theme.css' : 'styles.css';
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.getElementById('theme-style').href = savedTheme === 'dark' ? 'dark-theme.css' : 'styles.css';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            checkAuth();
+
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.getElementById('theme-style').href =
+                savedTheme === 'dark' ? 'dark-theme.css' : 'styles.css';
+        });
+        async function checkAuth() {
+            try {
+                const response = await fetch('/check-auth');
+                const data = await response.json();
+
+                if (data.authenticated && window.location.pathname === '/') {
+                    window.location.href = '/profile.html';
+                } else if (!data.authenticated && window.location.pathname !== '/') {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Ошибка проверки аутентификации:', error);
+                if (window.location.pathname !== '/') {
+                    window.location.href = '/';
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
