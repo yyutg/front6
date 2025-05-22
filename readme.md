@@ -4,7 +4,7 @@
 
 ### 1. Клонирование репозитория
 ```bash
-git clone https://github.com/EbatteSratte/Praktika6.git
+git clone https://github.com/yyutg/front2
 cd <папка-проекта>
 ```
 ### 2. Установка зависимостей
